@@ -120,18 +120,26 @@ document.addEventListener('DOMContentLoaded', () => {
   let charts = [];
   const buildCharts = () => {
     if (!window.Chart) return; charts.forEach(c => c.destroy()); charts = [];
-    const css = getComputedStyle(document.documentElement), ink = css.getPropertyValue('--ink').trim(), line = css.getPropertyValue('--line').trim(), mute = css.getPropertyValue('--mute').trim();
-    Chart.defaults.font.family = "'JetBrains Mono',monospace"; Chart.defaults.font.size = 11; Chart.defaults.color = mute; Chart.defaults.borderColor = line;
-    const ang = [0, 45, 90, 135, 180], X = T(['Finger angle (°)', 'Ángulo del dedo (°)']);
-    const axis = (x, y) => ({ plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: x } }, y: { title: { display: true, text: y } } } });
+    const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
+    const c1 = v('--chart'), c2 = v('--chart2'), ink = v('--ink'), line = v('--line'), mute = v('--mute');
+    Chart.defaults.font.family = "'JetBrains Mono',monospace"; Chart.defaults.font.size = 11; Chart.defaults.color = mute; Chart.defaults.borderColor = line; Chart.defaults.animation.duration = 800;
+    const cross = { id: 'cross', afterDatasetsDraw(c) { const a = c.tooltip && c.tooltip.getActiveElements(); if (!a || !a.length || c.config.type !== 'line') return; const x = a[0].element.x, ar = c.chartArea, cx = c.ctx; cx.save(); cx.strokeStyle = mute; cx.setLineDash([4, 4]); cx.beginPath(); cx.moveTo(x, ar.top); cx.lineTo(x, ar.bottom); cx.stroke(); cx.restore(); } };
+    const tip = cb => ({ backgroundColor: v('--card'), titleColor: ink, bodyColor: v('--body'), borderColor: line, borderWidth: 1, padding: 10, cornerRadius: 8, displayColors: false, callbacks: cb });
+    const ang = [0, 45, 90, 135, 180], ADC = [2317, 2143, 1993, 1824, 1633], V = [1.87, 1.73, 1.61, 1.47, 1.32], R = [36066, 42811, 49570, 58518, 70860];
+    const X = T(['Finger angle (°)', 'Ángulo del dedo (°)']);
+    const ttl = i => T(['Angle', 'Ángulo']) + ': ' + i[0].label + '°';
+    const extra = i => [`ADC: ${ADC[i[0].dataIndex]}`, `Vout: ${V[i[0].dataIndex]} V`, `Rflex: ${(R[i[0].dataIndex] / 1000).toFixed(1)} kΩ`];
+    const lineCfg = (data, y, label) => ({ type: 'line', plugins: [cross], data: { labels: ang, datasets: [{ data, borderColor: c1, backgroundColor: c1 + '22', fill: true, tension: .25, pointRadius: 5, pointHoverRadius: 9, pointBackgroundColor: c1, pointHoverBackgroundColor: ink, pointBorderColor: v('--card'), pointBorderWidth: 2 }] },
+      options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: tip({ title: ttl, label: i => label(i), afterBody: extra }) }, scales: { x: { title: { display: true, text: X } }, y: { title: { display: true, text: y } } } } });
     const add = (el, cfg) => charts.push(new Chart($(el), cfg));
-    add('#chart', { type: 'line', data: { labels: ang, datasets: [{ data: [2317, 2143, 1993, 1824, 1633], borderColor: ink, backgroundColor: ink, tension: .2, pointRadius: 5 }] }, options: axis(X, T(['ADC reading', 'Lectura ADC'])) });
-    const D = { r: [36066, 42811, 49570, 58518, 70860], v: [1.87, 1.73, 1.61, 1.47, 1.32] }, L = { r: 'Rflex (Ω)', v: 'Vout (V)' };
+    add('#chart', lineCfg(ADC, T(['ADC reading', 'Lectura ADC']), i => `ADC: ${i.raw}`));
     const act = $('#ctabs .tab.on').dataset.k;
-    add('#c-multi', { type: 'line', data: { labels: ang, datasets: [{ data: D[act], borderColor: ink, backgroundColor: ink, tension: .2, pointRadius: 5 }] }, options: axis(X, L[act]) });
-    add('#c-rf', { type: 'bar', data: { labels: ['10 kΩ', '47 kΩ'], datasets: [{ data: [310, 700], backgroundColor: [line, ink] }] }, options: axis(T(['Fixed resistor', 'Resistencia fija']), T(['ADC reading variation', 'Variación de la lectura ADC'])) });
-    add('#c-cal', { type: 'bar', data: { labels: T([['Thumb', 'Index', 'Middle', 'Ring', 'Little'], ['Pulgar', 'Índice', 'Corazón', 'Anular', 'Meñique']]), datasets: [{ data: [[1530, 2100], [1530, 2100], [1700, 2300], [1650, 2100], [1730, 2000]], backgroundColor: ink, borderSkipped: false }] },
-      options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 1400, max: 2400, title: { display: true, text: T(['ADC reading (minFlex to maxFlex)', 'Lectura ADC (de minFlex a maxFlex)']) } } } } });
+    add('#c-multi', lineCfg(act === 'r' ? R : V, act === 'r' ? 'Rflex (Ω)' : 'Vout (V)', i => act === 'r' ? `Rflex: ${i.raw} Ω` : `Vout: ${i.raw} V`));
+    add('#c-rf', { type: 'bar', data: { labels: ['10 kΩ', '47 kΩ'], datasets: [{ data: [310, 700], backgroundColor: [c2, c1], hoverBackgroundColor: [mute, ink], borderRadius: 6 }] },
+      options: { plugins: { legend: { display: false }, tooltip: tip({ title: i => T(['Fixed resistor ', 'Resistencia fija ']) + i[0].label, label: i => T(['Variation: ', 'Variación: ']) + i.raw + T([' ADC units', ' unidades ADC']), afterBody: i => [T(['Range: ', 'Rango: ']) + ['150 – 460', '1600 – 2300'][i[0].dataIndex]] }) },
+        scales: { x: { title: { display: true, text: T(['Fixed resistor', 'Resistencia fija']) } }, y: { title: { display: true, text: T(['ADC reading variation', 'Variación de la lectura ADC']) } } } } });
+    add('#c-cal', { type: 'bar', data: { labels: T([['Thumb', 'Index', 'Middle', 'Ring', 'Little'], ['Pulgar', 'Índice', 'Corazón', 'Anular', 'Meñique']]), datasets: [{ data: [[1530, 2100], [1530, 2100], [1700, 2300], [1650, 2100], [1730, 2000]], backgroundColor: c1, hoverBackgroundColor: ink, borderRadius: 6, borderSkipped: false }] },
+      options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: tip({ title: i => i[0].label, label: i => `minFlex ${i.raw[0]} · maxFlex ${i.raw[1]}`, afterBody: i => [T(['Span: ', 'Recorrido: ']) + (i[0].raw[1] - i[0].raw[0]) + ' ADC'] }) }, scales: { x: { min: 1400, max: 2400, title: { display: true, text: T(['ADC reading (minFlex to maxFlex)', 'Lectura ADC (de minFlex a maxFlex)']) } } } } });
   };
   $$('#ctabs .tab').forEach(b => b.addEventListener('click', () => { $$('#ctabs .tab').forEach(x => x.classList.toggle('on', x === b)); buildCharts(); }));
   const adc = $('#adc'), calc = () => { const x = +adc.value; $('#adc-v').textContent = x; $('#adc-a').textContent = Math.trunc((x - 1530) * (0 - 180) / (2100 - 1530)) + 180; };
