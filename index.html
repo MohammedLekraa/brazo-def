@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Robotic Arm Control Using a Sensor Gloveeeee | ML Portfolio</title>
+<title>Robotic Arm Control Using a Sensor Glove | ML Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@700;800&family=JetBrains+Mono:wght@400;500;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
   <a href="../index.html" class="logo">ML // Portfolio</a>
   <div class="ctl">
     <div class="seg" role="group" aria-label="Language"><button data-l="en">EN</button><button data-l="es">ES</button></div>
-    <button class="btn ghost" id="theme">Dark view</button>
+    <button class="btn ghost" id="theme">Night view</button>
     <a href="../index.html" class="btn" data-es="&larr; Proyectos">&larr; Projects</a>
   </div>
 </header>
@@ -167,16 +167,16 @@
   <h3 data-es="Qué resistencia fija elegir">Which fixed resistor to choose</h3>
   <div class="grid2 mid-al">
     <p data-es="Primero se usó una resistencia de 10 kΩ. Funcionaba, pero la señal ocupaba un rango pequeño: entre 150 y 460 unidades del ADC, una variación de unos 310 puntos. SparkFun recomienda 47 kΩ para estos sensores. Con ese valor la lectura va de unas 1600 a 2300, una variación de unos 700 puntos. Un rango mayor distingue mejor los cambios pequeños y da un control más progresivo del servo, por eso se eligió 47 kΩ.">At first a 10 kΩ resistor was used. It worked, but the signal covered a small range: 150 to 460 ADC units, a variation of about 310 points. SparkFun recommends 47 kΩ for these sensors. With that value the reading goes from about 1600 to 2300, a variation of about 700 points. A wider range tells small changes apart better and gives smoother servo control, so 47 kΩ was chosen.</p>
-    <div class="card"><canvas id="c-rf" aria-label="ADC range with 10 kΩ and 47 kΩ"></canvas></div>
+    <div class="card"><canvas id="c-rf" aria-label="ADC range with 10 kΩ and 47 kΩ"></canvas><p class="mono hint" data-es="Pasa el cursor por el gráfico para ver los valores.">Hover over the chart to see the values.</p></div>
   </div>
 
   <h3 data-es="Caracterización: la relación entre ángulo y lectura es una recta">Characterisation: angle and reading follow a straight line</h3>
   <p data-es="Para cada sensor se fijó el dedo a 0°, 45°, 90°, 135° y 180° y se anotó la lectura del ADC. Los puntos se alinean aproximadamente en una recta, sin saltos ni saturaciones. Aunque físicamente el sensor no es perfectamente lineal, la dispersión es lo bastante pequeña para aproximarlo con una recta en el rango de trabajo.">For each sensor the finger was fixed at 0°, 45°, 90°, 135° and 180° and the ADC reading was recorded. The points line up roughly on a straight line, with no jumps or saturation. Although the sensor is not perfectly linear physically, the scatter is small enough to approximate it with a line within the working range.</p>
   <div class="grid2">
-    <div class="card"><canvas id="chart" aria-label="ADC reading versus angle"></canvas></div>
+    <div class="card"><canvas id="chart" aria-label="ADC reading versus angle"></canvas><p class="mono hint" data-es="Pasa el cursor por el gráfico para ver los valores.">Hover over the chart to see the values.</p></div>
     <div class="card">
       <div class="tabs" id="ctabs"><button class="tab on" data-k="r" data-es="Resistencia">Resistance</button><button class="tab" data-k="v" data-es="Tensión">Voltage</button></div>
-      <canvas id="c-multi" aria-label="Resistance and voltage versus angle"></canvas>
+      <canvas id="c-multi" aria-label="Resistance and voltage versus angle"></canvas><p class="mono hint" data-es="Pasa el cursor por el gráfico para ver los valores.">Hover over the chart to see the values.</p>
     </div>
   </div>
 
@@ -196,7 +196,7 @@
 
   <h3 data-es="Calibración de los cinco sensores">Calibration of the five sensors</h3>
   <p data-es="Los cinco sensores se caracterizaron uno a uno, por las diferencias entre ellos y por su posición en el guante. Cada uno tiene su rango de ADC, de la máxima flexión al dedo extendido, y esos valores son los límites del mapeo.">The five sensors were characterised one by one, because of the differences between them and their position on the glove. Each has its own ADC range, from maximum flexion to the extended finger, and those values are the limits of the mapping.</p>
-  <div class="card"><canvas id="c-cal" aria-label="Calibration range of each finger"></canvas></div>
+  <div class="card"><canvas id="c-cal" aria-label="Calibration range of each finger"></canvas><p class="mono hint" data-es="Pasa el cursor por el gráfico para ver los valores.">Hover over the chart to see the values.</p></div>
 
   <h3 data-es="Filtrado y seguridad">Filtering and safety</h3>
   <p data-es="Cada lectura es la media de 8 muestras consecutivas, para reducir el ruido. Las lecturas fuera del intervalo de 1000 a 3000 se consideran no válidas y se mantiene el último valor correcto. En el brazo, el servo no salta a la nueva posición: en cada trama avanza solo una cuarta parte de la diferencia con el objetivo, y el movimiento resulta más suave.">Each reading is the average of 8 consecutive samples to reduce noise. Readings outside the 1000 to 3000 range are considered invalid and the last valid value is kept. At the arm, the servo does not jump to the new position: in each frame it moves only a quarter of the difference to the target, which makes the movement smoother.</p>
